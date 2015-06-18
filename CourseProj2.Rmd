@@ -1,0 +1,92 @@
+---
+output: pdf_document
+---
+```{r, echo=FALSE}
+library(ggplot2)
+data(ToothGrowth)
+ToothGrowth<-transform(ToothGrowth, dose=factor(dose))
+ToothGrowth<-transform(ToothGrowth, supp=factor(supp))
+
+#calculate means and standard deviations per group
+toothmeans=with(ToothGrowth, tapply(len, list(dose,supp), mean))
+toothsds=with(ToothGrowth, tapply(len, list(dose,supp), sd))
+toothns=with(ToothGrowth, tapply(len, list(dose,supp), length))
+
+tplus=round(toothmeans+qt(.95,(toothns-1))*toothsds/sqrt(toothns),2)
+tminus=round(toothmeans-qt(.95,(toothns-1))*toothsds/sqrt(toothns),2)
+```
+
+#Effective of Vit. C Supplemention on Tooth Growth 
+####Coursera: Statistical Inference Project 2
+####Eric Hullander
+##Abstract:  
+It is known that Vitamin C is required for dental growth, and lack of vitamin C can result in a condition known as scurvy.  Orange Juice is a known source of vitamin C, and in this experiment it is investigated whether supplemental vitamin C is as effective as orange juice at facilitating tooth growth when given in equal dosage.  
+
+##Method: 
+60 Guinnea pigs were divided into 6 groups of 10.  Each group was given vitamin C from either a supplement, VC, or orange juice, OJ.   Each group received a dosage of 0.5, 1.0, or 2.0 units of either OJ or VC.  The guinea pigs were euthenized and tooth growth was measured.  At each dosage level, growth was compared between the OJ and VC groups.
+
+```{r echo=FALSE}
+g <- ggplot(ToothGrowth, aes(x = dose, y = len, colour = supp, group=supp)) + geom_point() + geom_smooth(method="lm") + annotate("text", x=2, y=35, label="Tooth Growth v. Dosage")
+g
+```
+Figure 1: linear regression of tooth growth vs dosage for two groups
+
+```{r echo=FALSE}
+qplot(len, data=ToothGrowth, fill=supp, facets=.~dose,  binwidth  =  5)
+```
+Figure 2: Histogram of data shows approximately Gaussian distribution
+
+##Discussion: 
+We perform an exploratory analysis by examining the data in figure 1.  We see that at low dosages, it appears the VC group exhibits less less growth than the OJ group implying that VC is not as effective as OJ at facilitating toothgrowth. However, as the dosage increase it appears that the growth rates begin to even out.  At the highest dosage level, 2.0, we see little difference between growth rates in the two groups.
+
+##Analysis: 
+Before we quantify these observations, we make some assumptions.  We assume that the underlying data are iid 
+Gaussian with the result that
+$$
+\frac{\bar X - \mu}{S/\sqrt{n}}
+$$
+follows Gosset's $t$ distribution with $n-1$ degrees of freedom.  We observe this in Figure 2.  We assume the data is not paired, as each guinea pig was killed at the end of each experiment and would not be available for further testing.  We also assume that the variance between the two groups is not equal. 
+
+Next, we shall perform a t test at each dosage level on the two groups.  Our null Hypothesis is that our 95% confidence interval of the difference in the mean tooth growth of the two groups shall include zero.  This is what we would expect if the OJ group performed no differently than the VC group.  If zero is not included in the 95% confidence interval, we reject the null hypothesis in favor of the alternative, which is that the OJ group is different than the VC group.
+
+```{r echo=FALSE}
+
+for (ch in levels(ToothGrowth$dose))
+ {
+ x=subset(ToothGrowth,supp=="OJ" & dose == ch, 'len')
+ y=subset(ToothGrowth,supp=="VC" & dose == ch, 'len')
+ ttest=t.test(x,y, paired=FALSE, var.equal=FALSE)$conf
+ print(paste("dose=",ch))
+ print(ttest)
+}
+```
+##Conclusion: 
+As we can see from the results of our t test, the low dosage groups do not include zero favoring our alternative hypothesis.  The OJ group shows more growth than the VC group at dosage levels of 0.5 and 1.0.  However, at a dosage of 2.0, our two groups perform about the same, so we accept the null hypothesis at the higher dosage level.
+
+##Apendix: Code
+```{r echo=TRUE, eval=FALSE}
+library(ggplot2)
+data(ToothGrowth)
+ToothGrowth<-transform(ToothGrowth, dose=factor(dose))
+ToothGrowth<-transform(ToothGrowth, supp=factor(supp))
+
+#Figure 1
+
+g <- ggplot(ToothGrowth, aes(x = dose, y = len, colour = supp, group=supp)) 
++ geom_point() + geom_smooth(method="lm") 
++ annotate("text", x=2, y=35, label="Tooth Growth v. Dosage")
+g
+
+#Figure 2
+qplot(len, data=ToothGrowth, fill=supp, facets=.~dose,  binwidth  =  5)
+
+#T Test
+for (ch in levels(ToothGrowth$dose))
+ {
+ x=subset(ToothGrowth,supp=="OJ" & dose == ch, 'len')
+ y=subset(ToothGrowth,supp=="VC" & dose == ch, 'len')
+ ttest=t.test(x,y, paired=FALSE, var.equal=FALSE)$conf
+ print(paste("dose=",ch))
+ print(ttest)
+}
+```

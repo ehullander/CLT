@@ -1,0 +1,99 @@
+---
+output: word_document
+---
+#Validation of Central Limit Theorem 
+####Coursera: Statistical Inference Project 1
+####Eric Hullander
+
+## Exponential Distribution
+
+* $X \sim exp(\lambda)$.
+* $\mu = E[X] = 1 / \lambda$
+* $\sigma = [X] = 1 / \lambda$
+
+The mean of 40 samples are taken from an exponential distribution described above.  A simulation is run and the mean is calculated 10000 times.  The mean and standard deviation of the means are then calculated from the distribution of sample means.  As can be seen, the histogram of sample means approximates the normal curve with $\mu = 1 / \lambda$ and sd, $\sigma = (1 / \lambda)/\sqrt{n}$.
+
+```{r echo=FALSE}
+N=10000
+n=40
+m=5
+ypop=rexp(N, 1/m)
+
+y=data.frame()
+for(i in 1:1000)
+  {
+    ysamp=sample(ypop,n, replace=FALSE)
+    y[i,1]=mean(ysamp)
+    y[i,2]=var(ysamp)
+    ##print(x)
+   }
+hist(y[,1], breaks = 50, prob=TRUE, main='Distribuition of Sample Means with n=40')
+x <- seq(0, 10, length=1000)
+ms=mean(y[,1])
+sds=sd(y[,1])
+norm <- dnorm(x,m,m/sqrt(n))
+par(col="green")
+lines(x,norm)
+
+#hist(y[,2], breaks = 30, prob=TRUE, main='Dist. of Var of 40 samples')
+#x <- seq(0, 100, length=1000)
+#ms=mean(y[,2])
+#sds=sd(y[,2])
+#norm2 <- dnorm(x,ms,sds)
+#par(col="green")
+#lines(x,norm2)
+#manipulate(plot(y2, type = type), type = picker("points" = "p", "line" = "l", "step" = "s"))
+```
+---
+Mean of Sample Means
+
+$E[\bar X_i]=$
+```{r echo=FALSE}
+mean(y[,1])
+#theoretical mean
+````
+Theoretical Mean
+
+$1/\lambda=$
+```{r echo=FALSE}
+m
+```
+Standard Deviation of Sample Means (aka the standard error)
+
+$\sqrt{E[(\bar X_i-\mu)^2]}=$
+```{r echo=FALSE}
+sd(y[,1])
+#theoretical mean
+````
+Theoretical Standard Deviation of Sample Means
+
+$(1/\lambda)/\sqrt{n}=$
+```{r echo=FALSE}
+m/sqrt(n)
+```
+
+The sample mean is a good predictor of the population mean and with a standard error of about .8.  This value agrees with the theoretical mean and calculated standard error.
+
+```{r echo=TRUE, eval=FALSE}
+N=10000
+n=40
+m=5
+ypop=rexp(N, 1/m)
+
+y=data.frame()
+for(i in 1:1000)
+  {
+    ysamp=sample(ypop,n, replace=FALSE)
+    y[i,1]=mean(ysamp)
+    y[i,2]=var(ysamp)
+    ##print(x)
+   }
+hist(y[,1], breaks = 50, prob=TRUE, main='Distribuition of Sample Means with n=40')
+x <- seq(0, 10, length=1000)
+#calculate mean and sd of sample means
+ms=mean(y[,1])
+sds=sd(y[,1])
+#plot the normal curve with mu and sd = (1/lambda)/sqrt(n)
+norm <- dnorm(x,m,m/sqrt(n))
+par(col="green")
+lines(x,norm)
