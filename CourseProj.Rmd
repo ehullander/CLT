@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: word_document
 ---
 #Validation of Central Limit Theorem 
 ####Coursera: Statistical Inference Project 1
